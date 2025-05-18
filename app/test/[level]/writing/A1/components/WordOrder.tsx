@@ -1,30 +1,19 @@
 'use client'
-import type { WordOrder } from '@/types'
+import { useGlobalStore } from '@/libs/store/store'
+import type { WordOrder, WordOrderWord } from '@/types'
 import { Card, CardHeader, CardBody } from '@heroui/card'
 import { Select, SelectItem } from '@heroui/select'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ReactSortable } from 'react-sortablejs'
 type Sentence = {
-  id: string | number
-  word: string
-  startingPos: number
-  correctPos: number
-  userPos: number
-  selected?: boolean
-  chosen?: boolean
-  filtered?: boolean
-}[]
-
-type DataParsed = {
   id: number
   word: string
   startingPos: number
   correctPos: number
   userPos: number
-  filtered?: undefined
-}
+}[]
 
-const dataParse = (data: WordOrder[]): DataParsed[][] => {
+const dataParse = (data: WordOrder[]): WordOrderWord[][] => {
   const grouped: Record<number, WordOrder[]> = {}
 
   // Agrupar por exercise_id
@@ -36,7 +25,7 @@ const dataParse = (data: WordOrder[]): DataParsed[][] => {
   }
 
   // Transformar cada grupo
-  const result: DataParsed[][] = Object.values(grouped).map((group) => {
+  const result: WordOrderWord[][] = Object.values(grouped).map((group) => {
     return group.map((item) => ({
       id: item.id,
       word: item.word,
@@ -49,10 +38,12 @@ const dataParse = (data: WordOrder[]): DataParsed[][] => {
   return result
 }
 
-function useSentenceOrderManager(initValue: Sentence[]): [
-  Sentence[], // sentences
-  (sentenceIndex: number) => (newState: Sentence) => void, // setValueConstructor
-  (sentenceIndex: number) => Sentence // getValue
+function useSentenceOrderManager(
+  initValue: Sentence[]
+): [
+  Sentence[],
+  (sentenceIndex: number) => (newState: Sentence) => void,
+  (sentenceIndex: number) => Sentence
 ] {
   const [v, setV] = useState<Sentence[]>(initValue)
 
@@ -78,12 +69,7 @@ function useSentenceOrderManager(initValue: Sentence[]): [
       sentenceIndex < v.length &&
       v[sentenceIndex]
     )
-      return v[sentenceIndex].map((word) => ({
-        selected: false,
-        chosen: false,
-        filtered: false,
-        ...word
-      }))
+      return v[sentenceIndex]
 
     return [
       {
@@ -91,10 +77,7 @@ function useSentenceOrderManager(initValue: Sentence[]): [
         word: 'Error',
         startingPos: 0,
         correctPos: 0,
-        userPos: 0,
-        selected: false,
-        chosen: false,
-        filtered: false
+        userPos: 0
       }
     ]
   }
@@ -103,8 +86,7 @@ function useSentenceOrderManager(initValue: Sentence[]): [
     sentence.map((word) => ({
       ...word,
       selected: false,
-      chosen: false,
-      filtered: false
+      chosen: false
     }))
   )
 
@@ -115,6 +97,17 @@ export default function WordOrder({ data }: { data: WordOrder[] }) {
   const [sentences, setValueConstructor] = useSentenceOrderManager(
     dataParse(data)
   )
+  const setWordOrderExerciseId = useGlobalStore((state) => state.setWordOrderExerciseId)
+  const setWordOrderAnswer = useGlobalStore((state) => state.setWordOrderAnswer)
+
+  useEffect(() => {
+    setWordOrderExerciseId(data[0].exercise_id)
+  }, [data])
+
+  useEffect(() => {
+    setWordOrderAnswer(sentences)
+  }, [sentences])
+
   return (
     <Card className="md:px-10 py-4 my-6" shadow="sm">
       <CardHeader>

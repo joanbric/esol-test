@@ -5,6 +5,7 @@ import WordOrder from './components/WordOrder'
 import SentenceCompletion from './components/SentenceCompletion'
 import PhrasalVerbs from './components/PhrasalVerbs'
 import { WritingA1Test } from '@/types'
+import Submit from './components/Submit'
 export default async function WritingA1Page({
   params
 }: {
@@ -26,7 +27,7 @@ export default async function WritingA1Page({
       {test && (
         <ol className="max-w-[80ch] mx-auto">
           <li>
-            <Punctuation data={test.punctuation} />
+            {/* <Punctuation data={test.punctuation} /> */}
           </li>
           <li>
             <Spelling data={test.spelling} />
@@ -45,6 +46,7 @@ export default async function WritingA1Page({
           </li>
         </ol>
       )}
+      <Submit />
     </main>
   )
 }

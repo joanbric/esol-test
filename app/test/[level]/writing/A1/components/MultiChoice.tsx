@@ -1,106 +1,22 @@
 'use client'
-import type { MultiChoice, MultiChoiceParsed } from '@/types'
+import { useGlobalStore } from '@/libs/store/store'
+import type { MultiChoiceParsed } from '@/types'
 import { Card, CardHeader, CardBody } from '@heroui/card'
 import { Select, SelectItem } from '@heroui/select'
-
-// const data = {
-//   script: `If you dislike your job or {{1}} unhappy in your relationship or you
-// simply feel like you’ve lost your way in life,
-// {{2}} a hobby can be a way to build yourself
-// {{3}}. Maybe you {{4}} knitting or
-// playing the piano and the small improvements you make week to week are
-// enough to {{5}} you while you try to figure out the rest
-// of your life. Sometimes hobbies give you one solid thing to feel
-// {{6}} about.`,
-//   options: {
-//     1: [
-//       {
-//         value: 'you',
-//         correct: true
-//       },
-//       {
-//         value: 'you\'re',
-//         correct: false
-//       },
-//       {
-//         value: 'your',
-//         correct: false
-//       }
-//     ],
-//     2: [
-//       {
-//         value: 'development',
-//         correct: true
-//       },
-//       {
-//         value: 'developing',
-//         correct: false
-//       },
-//       {
-//         value: 'developed',
-//         correct: false
-//       }
-//     ],
-//     3: [
-//       {
-//         value: 'back_on',
-//         correct: true
-//       },
-//       {
-//         value: 'back_in',
-//         correct: false
-//       },
-//       {
-//         value: 'back_up',
-//         correct: false
-//       }
-//     ],
-//     4: [
-//       {
-//         value: 'take_on',
-//         correct: true
-//       },
-//       {
-//         value: 'take_off',
-//         correct: false
-//       },
-//       {
-//         value: 'take_up',
-//         correct: false
-//       }
-//     ],
-//     5: [
-//       {
-//         value: 'sustain',
-//         correct: true
-//       },
-//       {
-//         value: 'sustaining',
-//         correct: false
-//       },
-//       {
-//         value: 'sustained',
-//         correct: false
-//       }
-//     ],
-//     6: [
-//       {
-//         value: 'good',
-//         correct: true
-//       },
-//       {
-//         value: 'well',
-//         correct: false
-//       },
-//       {
-//         value: 'plenty',
-//         correct: false
-//       }
-//     ]
-//   }
-// }
+import { useEffect } from 'react'
 
 export default function MultiChoice({ data }: { data: MultiChoiceParsed }) {
+  const setMultiChoiceAnswer = useGlobalStore(
+    (state) => state.setMultiChoiceAnswer
+  )
+  const setExerciseId = useGlobalStore((state) => state.setExerciseId)
+
+  useEffect(() => setExerciseId(data.id), [data.id])
+
+  function handleSelectChange(gapID: number, optionID: number) {
+    setMultiChoiceAnswer(gapID, optionID)
+  }
+
   return (
     <Card className="md:px-10 py-4 my-6" shadow="sm">
       <CardHeader>
@@ -124,6 +40,12 @@ export default function MultiChoice({ data }: { data: MultiChoiceParsed }) {
                   variant="bordered"
                   isRequired
                   aria-label={`Select an option for gap ${index + 1}`}
+                  onChange={(e) =>
+                    handleSelectChange(
+                      data.gaps[index].gapID,
+                      parseInt(e.target.value)
+                    )
+                  }
                 >
                   {data.gaps[index].options.map((option) => (
                     <SelectItem key={option.id}>{option.word}</SelectItem>

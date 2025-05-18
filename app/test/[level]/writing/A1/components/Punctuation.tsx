@@ -2,7 +2,7 @@
 import { Card, CardHeader, CardBody } from '@heroui/card'
 import type { Punctuation, PunctuationWord } from '@/types'
 import DropDownWord from './DropDownWord'
-import { useWritingA1Store } from '@stores/stores'
+import { useWritingA1Store } from '@/libs/store/store'
 import { useCallback } from 'react'
 
 type Props = {

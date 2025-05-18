@@ -1,35 +1,24 @@
 'use client'
+import { useGlobalStore } from '@/libs/store/store'
 import { PhrasalVerb } from '@/types'
 import { Card, CardHeader, CardBody } from '@heroui/card'
 import { Input } from '@heroui/input'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-// const data = [
-//   {
-//     phrasalVerb: 'take over',
-//     userAnswer: ''
-//   },
-//   {
-//     phrasalVerb: 'show up',
-//     userAnswer: ''
-//   },
-//   {
-//     phrasalVerb: 'look forward to',
-//     userAnswer: ''
-//   },
-//   {
-//     phrasalVerb: 'put together',
-//     userAnswer: ''
-//   },
-//   {
-//     phrasalVerb: 'turn up',
-//     userAnswer: ''
-//   },
-//   {
-//     phrasalVerb: 'stick to',
-//     userAnswer: ''
-//   }
-// ]
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function debounce(fn: (...args: any[]) => void, delay: number) {
+  let timeoutID: number | null = null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return function (...args: any[]) {
+    if (timeoutID) {
+      clearTimeout(timeoutID)
+    }
+    timeoutID = window.setTimeout(() => {
+      fn(...args)
+      timeoutID = null
+    }, delay)
+  }
+}
 export default function PhrasalVerbs({ data }: { data: PhrasalVerb[] }) {
   const [phrasalVerbs, setPhrasalVerbs] = useState(
     data.map((item) => ({
@@ -37,6 +26,13 @@ export default function PhrasalVerbs({ data }: { data: PhrasalVerb[] }) {
       userAnswer: ''
     }))
   )
+  const setPhrasalVerbsAnswer = useGlobalStore(
+    (state) => state.setPhrasalVerbsAnswer
+  )
+  const debouncedSetPhrasalVerbsAnswer = debounce(setPhrasalVerbsAnswer, 500)
+  useEffect(() => {
+    debouncedSetPhrasalVerbsAnswer(phrasalVerbs)
+  }, [phrasalVerbs])
   return (
     <Card className="md:px-10 py-4 my-6" shadow="sm">
       <CardHeader>
