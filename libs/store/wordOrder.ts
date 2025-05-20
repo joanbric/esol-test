@@ -1,11 +1,11 @@
 import { StateCreator } from 'zustand'
-import { WordOrderAnswer, WordOrderWord } from '@/types'
+import { WordOrderAnswer, WordOrderWordAnswer} from '@/types'
 
 export type WordOrderStates = WordOrderAnswer
 
 export type WordOrderActions = {
   setWordOrderExerciseId: (exerciseId: number) => void
-  setWordOrderAnswer: (answer: WordOrderWord[][]) => void
+  setWordOrderAnswer: (answer: WordOrderWordAnswer[][]) => void
 }
 
 export const createWordOrderStore: StateCreator<
