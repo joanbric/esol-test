@@ -1,21 +1,23 @@
 'use client'
 import { useGlobalStore } from '@/libs/store/store'
-import { SpellingWord } from '@/types'
+import { SpellingSolution, SpellingWord } from '@/types'
 import { useRef, useState } from 'react'
 import { Delete, Save } from 'lucide-react'
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownSection
-} from '@heroui/dropdown'
+import { Dropdown, DropdownItem, DropdownTrigger, DropdownMenu, DropdownSection } from '@heroui/dropdown'
 const unchangedValue = {
   word: '',
   position: -1,
   isChanged: false
 }
-export default function InputWord({ word }: { word: SpellingWord }) {
+export default function InputWord({
+  word,
+  solution,
+  isReadOnly = false
+}: {
+  word: SpellingWord
+  solution?: SpellingSolution
+  isReadOnly?: boolean
+}) {
   const defaultValue = word.word
   const [inputValue, setInputValue] = useState(unchangedValue)
   const refInput = useRef<HTMLInputElement>(null)
@@ -43,14 +45,38 @@ export default function InputWord({ word }: { word: SpellingWord }) {
     })
   }
 
+  const getComponentStyles = () => {
+    if (inputValue.isChanged) {
+      if (!solution && isReadOnly) return 'text-danger'
+      if (!solution) return 'text-primary'
+      if (solution.solution === inputValue.word) return 'text-green-500'
+      else return 'text-red-500'
+    }else if (isReadOnly && solution) {
+      return 'text-amber-600'
+    }
+    return ''
+  }
+
+  if (isReadOnly)
+    return (
+      <span className={`${getComponentStyles()} inline-block relative`}>
+        {(inputValue.isChanged || solution) ? (
+          <span className="absolute top-0 left-0 -translate-y-[0.3lh] text-nowrap w-full text-red-800 z-10 text-sm text-center">
+            {defaultValue}
+          </span>
+        ) : null}
+        {inputValue.isChanged ? inputValue.word : solution?.solution ? solution.solution : defaultValue}
+      </span>
+    )
+
   return (
-    <Dropdown>
+    <Dropdown
+      onOpenChange={(open) => {
+        if (open) refInput.current?.focus()
+      }}
+    >
       <DropdownTrigger>
-        <span
-          className={`${
-            inputValue.isChanged ? 'text-primary' : ''
-          } inline-block relative`}
-        >
+        <span className={`${getComponentStyles()} inline-block relative`}>
           {inputValue.isChanged ? (
             <span className="absolute top-0 left-0 -translate-y-[0.3lh] text-nowrap w-full text-red-800 z-10 text-sm text-center">
               {defaultValue}
@@ -63,7 +89,6 @@ export default function InputWord({ word }: { word: SpellingWord }) {
         disabledKeys={inputValue.isChanged ? [] : ['reset']}
         onAction={(key) => {
           if (key === 'accept') {
-          
             renderValue()
           }
           if (key === 'reset') {
@@ -88,13 +113,7 @@ export default function InputWord({ word }: { word: SpellingWord }) {
           ]
         }}
       >
-        <DropdownItem
-          key={word.position}
-          closeOnSelect={false}
-          data-hover={false}
-          autoFocus
-          className="border-2 border-gray-200"
-        >
+        <DropdownItem key={word.position} closeOnSelect={false} data-hover={false} className="border-2 border-gray-200">
           <input
             className="inline focus:outline-none py-2 text-lg "
             ref={refInput}
@@ -105,12 +124,8 @@ export default function InputWord({ word }: { word: SpellingWord }) {
         <DropdownSection showDivider>
           <DropdownItem
             key="accept"
-            closeOnSelect={false}
-            data-hover={false}
             className="data-[hover=true]:text-primary"
-            endContent={
-              <Save className="ml-2 text-primary-400 cursor-pointer" />
-            }
+            endContent={<Save className="ml-2 text-primary-400 cursor-pointer" />}
           >
             <span className="text-lg ">Accept</span>
           </DropdownItem>
@@ -118,12 +133,8 @@ export default function InputWord({ word }: { word: SpellingWord }) {
         <DropdownSection>
           <DropdownItem
             key="reset"
-            closeOnSelect={false}
-            data-hover={false}
             className="text-danger data-[hover=true]:text-danger data-[hover=true]:bg-red-200/20"
-            endContent={
-              <Delete className="ml-2 text-red-400  cursor-pointer" />
-            }
+            endContent={<Delete className="ml-2 text-red-400  cursor-pointer" />}
             color="danger"
           >
             <span className="text-lg font-semibold">Reset</span>

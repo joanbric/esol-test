@@ -17,6 +17,8 @@
     "@heroui/react": "2.8.0-beta.4",
     "@heroui/select": "2.4.19",
     "@heroui/theme": "2.4.15",
+    "@heroui/toast": "2.0.9",
+    "@heroui/tooltip": "2.2.16",
     "@libsql/client": "0.15.6",
     "framer-motion": "12.12.1",
     "lucide-react": "0.511.0",
@@ -36,6 +38,7 @@
     "@types/sortablejs": "1.15.8",
     "eslint": "9",
     "eslint-config-next": "15.3.2",
+    "prettier": "3.5.3",
     "tailwindcss": "4",
     "typescript": "5"
   }

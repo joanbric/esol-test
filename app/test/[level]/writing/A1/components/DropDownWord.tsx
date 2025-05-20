@@ -5,49 +5,96 @@ import {
   DropdownTrigger,
   DropdownMenu
 } from '@heroui/dropdown'
+import { Tooltip } from '@heroui/tooltip'
 import { memo, useCallback, useEffect, useState } from 'react'
-import type { PunctuationWord } from '@/types'
+import type {
+  PunctuationSolution,
+  PunctuationType,
+  PunctuationWord,
+  PunctuationWordAnswer
+} from '@/types'
 
 interface Props {
   wordValue: PunctuationWord
-  updateGlobalState: (word: PunctuationWord) => void
+  updateGlobalState: (word: PunctuationWordAnswer) => void
+  group: number
+  punctuationTypes: PunctuationType[]
+  punctuationSolution?: PunctuationSolution
+  isReadOnly?: boolean
 }
 
-export default memo(function DropDownWord({ wordValue, updateGlobalState }: Props) {
+function TooltipContent(userAnswer: string, solution: string) {
+  return (
+    <div className="p-3 text-md">
+      <p className="font-bold text-success-700">The correct answer is: {solution}</p>
+      <p>Your answer: {userAnswer}</p>
+    </div>
+  )
+}
 
+export default memo(function DropDownWord({
+  wordValue,
+  updateGlobalState,
+  group,
+  punctuationTypes,
+  punctuationSolution,
+  isReadOnly = false
+}: Props) {
   const [wordState, setWordState] = useState<PunctuationWord>(wordValue)
+  const [showTooltip, setShowTooltip] = useState(false)
 
   useEffect(() => {
-    if(wordState.isChanged) updateGlobalState(wordState)
+    if (wordState.isChanged)
+      updateGlobalState({
+        answer: wordState.word,
+        group,
+        punctuationTypeId: wordState.punctuationTypeId,
+        position: wordState.position
+      })
   }, [wordState])
 
-  const handleWordChange = useCallback((key: string) => {
-    setWordState((prev) => {
-      let wordValue = prev.word
+  const handleWordChange = useCallback(
+    (key: number) => {
+      const type = punctuationTypes.find((type) => type.id === key)
+      console.log('El tipo de puntuacion es: ', type, key)
+      if (!type) return
+      setWordState((prev) => {
+        let wordValue = prev.word
 
-      if (key === 'lowercase') wordValue = prev.word.toLowerCase()
-      else if (key === 'uppercase') wordValue = prev.word.toUpperCase()
-      else if (key === 'capitalised')
-        wordValue =
-          prev.word.charAt(0).toUpperCase() + prev.word.slice(1).toLowerCase()
-      else if (key === 'apostrophe') wordValue = addApostrophe(prev.word)
+        if (type.typeCode === 'lowercase') wordValue = prev.word.toLowerCase()
+        else if (type.typeCode === 'uppercase')
+          wordValue = prev.word.toUpperCase()
+        else if (type.typeCode === 'capitalised')
+          wordValue =
+            prev.word.charAt(0).toUpperCase() + prev.word.slice(1).toLowerCase()
+        else if (type.typeCode === 'apostrophe')
+          wordValue = addApostrophe(prev.word)
 
-      const newWord = {
+        const newWord = {
+          ...prev,
+          word: wordValue,
+          punctuationTypeId: type.id,
+          isChanged: true
+        }
+        return newWord
+      })
+    },
+    [punctuationTypes]
+  )
+
+  const handleSpecialCharacterChange = useCallback(
+    (key: number) => {
+      const type = punctuationTypes.find((type) => type.id === key)
+      if (!type) return
+      setWordState((prev) => ({
         ...prev,
-        word: wordValue,
+        word: type.typeCode,
+        punctuationTypeId: type.id,
         isChanged: true
-      }
-      return newWord
-    })
-  }, [])
-
-  const handleSpecialCharacterChange = useCallback((newWord: string) => {
-    setWordState((prev) => ({
-      ...prev,
-      word: newWord,
-      isChanged: true
-    }))
-  }, [])
+      }))
+    },
+    [punctuationTypes]
+  )
 
   const suffixes = ['nt', 'll', 've', 're', 'd', 'm', 's']
 
@@ -63,44 +110,65 @@ export default memo(function DropDownWord({ wordValue, updateGlobalState }: Prop
     }
     return `${word}'`
   }
+
+  const getComponentStyles = () => {
+    if (wordState.isChanged) {
+      if (!punctuationSolution) return 'text-primary font-bold'
+
+      if (punctuationSolution.punctuationTypeId === wordState.punctuationTypeId)
+        return 'text-green-500 font-bold'
+      else return 'text-red-500 font-bold'
+    } else if (punctuationSolution) {
+      return 'text-red-500 font-bold'
+    }
+    return ''
+  }
+
+  if (isReadOnly)
+    return (
+      <Tooltip
+        isOpen={showTooltip}
+        content={TooltipContent(
+          wordState.word,
+          punctuationSolution?.solution ?? wordValue.word
+        )}
+        onOpenChange={(open) => setShowTooltip(open)}
+        isDisabled={!punctuationSolution && !wordState.isChanged}
+      >
+        <span className={getComponentStyles()} onClick={() => setShowTooltip(true)}>
+          {punctuationSolution?.solution ?? wordState.word}
+        </span>
+      </Tooltip>
+    )
+
   return (
     <Dropdown>
       <DropdownTrigger>
-        <span
-          className={wordState.isChanged ? 'text-primary' : ''}
-          data-dropdown="true"
-        >
-          {wordState.word}
+        <span className={getComponentStyles()} data-dropdown="true">
+          {punctuationSolution?.solution ?? wordState.word}
         </span>
       </DropdownTrigger>
 
       {wordState.type !== 'space' ? (
         <DropdownMenu
-          onAction={(key) => handleWordChange(key.toString())}
+          onAction={(key) => handleWordChange(Number(key))}
           disabledKeys={wordState.hasApostrophe ? ['apostrophe'] : []}
         >
-          <DropdownItem key={'lowercase'}>Lowercase</DropdownItem>
-          <DropdownItem key={'uppercase'}>Uppercase</DropdownItem>
-          <DropdownItem key={'capitalised'}>Capitalised</DropdownItem>
-          <DropdownItem key={'apostrophe'}>Apostrophe (&apos;)</DropdownItem>
+          {punctuationTypes
+            .filter((type) => type.characterType === 1)
+            .map((type) => (
+              <DropdownItem key={type.id}>{type.description}</DropdownItem>
+            ))}
         </DropdownMenu>
       ) : (
         <DropdownMenu
-          onAction={(key) => handleSpecialCharacterChange(key.toString())}
+          onAction={(key) => handleSpecialCharacterChange(Number(key))}
         >
-          <DropdownItem key={' '}>Space</DropdownItem>
-          <DropdownItem key={'? '}>Question mark (?)</DropdownItem>
-          <DropdownItem key={'. '}>Full stop (.)</DropdownItem>
-          <DropdownItem key={'! '}>Exclamation mark (!)</DropdownItem>
-          <DropdownItem key={', '}>Comma (,)</DropdownItem>
-          <DropdownItem key={'; '}>Semicolon (;)</DropdownItem>
-          <DropdownItem key={': '}>Colon (:) </DropdownItem>
-          <DropdownItem key={' "'}>
-            Quotation mark (&quot; or &apos;)
-          </DropdownItem>
-          <DropdownItem key={'-'}>Hyphen (-)</DropdownItem>
-          <DropdownItem key={' — '}>Dash (—)</DropdownItem>
-          <DropdownItem key={'... '}>Ellipsis (...)</DropdownItem>
+          {punctuationTypes
+            .filter((type) => type.characterType === 2)
+            .map((type) => (
+              <DropdownItem key={type.id}>{type.description}</DropdownItem>
+            ))}
         </DropdownMenu>
       )}
     </Dropdown>

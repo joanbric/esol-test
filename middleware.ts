@@ -9,7 +9,8 @@ const isPublicRouter = createRouteMatcher([
   '/test/demo'
 ])
 const isProtectedRouter = createRouteMatcher([
-  '/test(.*)'
+  '/test(.*)',
+  // '/api(.*)'
 ])
 
 export default clerkMiddleware(async (auth, req)=>{

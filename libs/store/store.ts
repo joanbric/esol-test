@@ -32,6 +32,16 @@ import {
   PhrasalVerbStates,
   PhrasalVerbActions
 } from './phrasalVerb'
+import {
+  createWritingA1TestStore,
+  WritingA1TestStates,
+  WritingA1TestActions
+} from './WritingA1Test'
+import {
+  createWritingA1SolutionsStore,
+  WritingA1SolutionsStates,
+  WritingA1SolutionsActions
+} from './WritingA1Solutions'
 
 type WritingA1Store = PunctuationStates &
   PunctuationActions &
@@ -44,7 +54,11 @@ type WritingA1Store = PunctuationStates &
   SentenceCompletionStates &
   SentenceCompletionActions &
   PhrasalVerbStates &
-  PhrasalVerbActions
+  PhrasalVerbActions &
+  WritingA1TestStates &
+  WritingA1TestActions &
+  WritingA1SolutionsStates &
+  WritingA1SolutionsActions
 
 export const useGlobalStore = create<WritingA1Store>((...arg) => ({
   ...createPunctuationStore(...arg),
@@ -52,5 +66,7 @@ export const useGlobalStore = create<WritingA1Store>((...arg) => ({
   ...createMultiChoiceStore(...arg),
   ...createWordOrderStore(...arg),
   ...createSentenceCompletionStore(...arg),
-  ...createPhrasalVerbStore(...arg)
+  ...createPhrasalVerbStore(...arg),
+  ...createWritingA1TestStore(...arg),
+  ...createWritingA1SolutionsStore(...arg)
 }))

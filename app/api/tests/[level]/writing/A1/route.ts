@@ -11,27 +11,22 @@ import type {
   PhrasalVerb,
   WritingA1Test
 } from '@/types'
-import { createClient } from '@libsql/client'
-
-const db = createClient({
-  url: process.env.TURSO_DATABASE_URL!,
-  authToken: process.env.TURSO_AUTH_TOKEN
-})
+import { turso } from '@/libs/db'
 
 async function getExercises(
   topicId: number,
   levelId: number
 ): Promise<WritingA1Test_SQL> {
   const queries = {
-    punctuation: db.execute({
+    punctuation: turso.execute({
       sql: 'SELECT id, title, script FROM punctuation WHERE topic_id = ? AND level_id = ?',
       args: [topicId, levelId]
     }),
-    spelling: db.execute({
+    spelling: turso.execute({
       sql: 'SELECT id, script FROM spelling WHERE topic_id = ? AND level_id = ?',
       args: [topicId, levelId]
     }),
-    multiChoice: db.execute({
+    multiChoice: turso.execute({
       sql: `
         SELECT mc.id, mc.exercise, mcg.id as gap_id, mcg.position, mcg.correct_option_id, mcgo.id as option_id, mcgo.value as option_word FROM (
           multi_choice mc
@@ -42,7 +37,7 @@ async function getExercises(
       `,
       args: [topicId, levelId]
     }),
-    wordOrder: db.execute({
+    wordOrder: turso.execute({
       sql: `
         SELECT wos.* FROM words_order wo
         JOIN words_order_solution wos ON wo.id = wos.exercise_id
@@ -50,11 +45,11 @@ async function getExercises(
       `,
       args: [topicId, levelId]
     }),
-    sentenceCompletion: db.execute({
+    sentenceCompletion: turso.execute({
       sql: 'SELECT id, beginning_sentence FROM sentence_completion WHERE topic_id = ? AND level_id = ? LIMIT 6',
       args: [topicId, levelId]
     }),
-    phrasalVerbs: db.execute({
+    phrasalVerbs: turso.execute({
       sql: 'SELECT id, verb FROM phrasal_verbs WHERE topic_id = ? AND level_id = ? LIMIT 6',
       args: [topicId, levelId]
     })
@@ -201,9 +196,7 @@ export async function GET() {
   const exercises = await getExercises(1, 6)
   const exercisesParsed = transformData(exercises)
 
-  return new Response(
-    JSON.stringify({ test: { ...exercisesParsed } })
-  )
+  return new Response(JSON.stringify({ test: { ...exercisesParsed } }))
 }
 
 export async function POST(request: NextRequest) {

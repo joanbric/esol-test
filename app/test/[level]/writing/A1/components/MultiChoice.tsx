@@ -4,12 +4,15 @@ import type { MultiChoiceParsed } from '@/types'
 import { Card, CardHeader, CardBody } from '@heroui/card'
 import { Select, SelectItem } from '@heroui/select'
 import { useEffect } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 export default function MultiChoice({ data }: { data: MultiChoiceParsed }) {
-  const setMultiChoiceAnswer = useGlobalStore(
-    (state) => state.setMultiChoiceAnswer
+  const { setMultiChoiceAnswer, setExerciseId } = useGlobalStore(
+    useShallow((state) => ({
+      setMultiChoiceAnswer: state.setMultiChoiceAnswer,
+      setExerciseId: state.setExerciseId
+    }))
   )
-  const setExerciseId = useGlobalStore((state) => state.setExerciseId)
 
   useEffect(() => setExerciseId(data.id), [data.id])
 
@@ -20,9 +23,7 @@ export default function MultiChoice({ data }: { data: MultiChoiceParsed }) {
   return (
     <Card className="md:px-10 py-4 my-6" shadow="sm">
       <CardHeader>
-        <h3 className="font-bold text-lg">
-          3. Complete the text by selecting the grammatically correct word.
-        </h3>
+        <h3 className="font-bold text-lg">3. Complete the text by selecting the grammatically correct word.</h3>
       </CardHeader>
       <CardBody>
         <div>
@@ -40,12 +41,7 @@ export default function MultiChoice({ data }: { data: MultiChoiceParsed }) {
                   variant="bordered"
                   isRequired
                   aria-label={`Select an option for gap ${index + 1}`}
-                  onChange={(e) =>
-                    handleSelectChange(
-                      data.gaps[index].gapID,
-                      parseInt(e.target.value)
-                    )
-                  }
+                  onChange={(e) => handleSelectChange(data.gaps[index].gapID, parseInt(e.target.value))}
                 >
                   {data.gaps[index].options.map((option) => (
                     <SelectItem key={option.id}>{option.word}</SelectItem>

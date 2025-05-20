@@ -44,6 +44,7 @@ export interface PunctuationWord {
   word: string
   position: number
   type: 'word' | 'space'
+  punctuationTypeId: number
   isChanged: boolean
   hasApostrophe: boolean
 }
@@ -98,12 +99,19 @@ export interface WritingA1Answer {
   multiChoice: MultiChoiceAnswer
   wordOrder: WordOrderAnswer
   sentenceCompletion: SentenceCompletionAnswer
-  phrasalVerbs: PhrasalVerbAnswer
+  phrasalVerbs: PhrasalVerbsAnswer
 }
 
 export interface PunctuationAnswer {
-  exerciseId: number
-  answer: Array<{ word: string; position: number; type: 'word' | 'space' }>
+  PunctuationExerciseId: number
+  PunctuationAnswer: PunctuationWordAnswer[]
+}
+
+export interface PunctuationWordAnswer {
+  position: number
+  answer: string
+  group: number
+  punctuationTypeId: number
 }
 
 export interface SpellingAnswer {
@@ -123,15 +131,16 @@ export interface MultiChoiceAnswer {
 
 export interface WordOrderAnswer {
   WordOrderExerciseId: number
-  WordOrderAnswer: WordOrderWord[][]
+  WordOrderAnswer: WordOrderWordAnswer[][]
 }
 
-export interface WordOrderWord {
+export interface WordOrderWordAnswer {
   id: number
   word: string
   startingPos: number
   correctPos: number
   userPos: number
+  exercise_id: number
 }
 
 export interface SentenceCompletionAnswer {
@@ -143,3 +152,64 @@ export interface PhrasalVerbsAnswer {
   PhrasalVerbsExerciseId: number
   PhrasalVerbsAnswer: Array<{ id: number; userAnswer: string }>
 }
+
+
+export interface WritingA1Solution {
+  punctuationSolution: PunctuationSolution[]
+  spellingSolution: SpellingSolution[]
+  multiChoiceSolution: MultiChoiceSolution[]
+  wordOrderSolution: WordOrderSolution[]
+  sentenceCompletionSolution: SentenceCompletionSolution[]
+  phrasalVerbsSolution: PhrasalVerbsSolution[]
+}
+
+export interface PunctuationSolution {
+  position: number
+  solution: string
+  punctuationTypeId: number
+  group: number
+}
+
+export interface PunctuationType {
+  id: number
+  typeCode: string
+  description: string
+  characterType: number
+}
+
+export interface SpellingSolution {
+  position: number
+  solution: string
+}
+
+export interface MultiChoiceSolution {
+  gapID: number
+  correctOptionID: number
+}
+
+export interface WordOrderSolution {
+  id: number
+  wordOrder: number
+  wordOrder2: number | null
+  wordOrder3: number | null
+  wordOrder4: number | null
+}
+
+export interface SentenceCompletionSolution {
+  id: number
+  isCorrect: boolean | null
+  teacherApproved: boolean | null
+  aiApproved: boolean | null
+  teacherComment: string | null
+  aiComment: string | null
+}
+
+export interface PhrasalVerbsSolution {
+  id: number
+  isCorrect: boolean | null
+  teacherApproved: boolean | null
+  aiApproved: boolean | null
+  teacherComment: string | null
+  aiComment: string | null
+}
+
