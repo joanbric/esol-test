@@ -4,6 +4,7 @@
 import { turso } from '@/libs/db'
 import { auth } from '@clerk/nextjs/server'
 import { WritingA1Answer } from '@/types'
+import { headers } from 'next/headers'
 
 // interface SubmitExerciseAnswersParams {
 //   multiChoiceAnswers: { option_id: number; gap_id: number }[]
@@ -33,14 +34,42 @@ import { WritingA1Answer } from '@/types'
 //   }[]
 // }
 
-export async function submitExerciseAnswers({multiChoice, sentenceCompletion, spelling, wordOrder, punctuation, phrasalVerbs}: WritingA1Answer) {
+export async function submitExerciseAnswers({
+  multiChoice,
+  sentenceCompletion,
+  spelling,
+  wordOrder,
+  punctuation,
+  phrasalVerbs
+}: WritingA1Answer) {
   const tx = await turso.transaction()
 
   try {
     const now = new Date().toISOString()
     const { userId } = await auth()
 
-    if (!userId) throw new Error('User not authenticated')
+    let effectiveUserId = userId
+
+    // Check if user is authenticated or can proceed as guest (by IP)
+    if (!userId) {
+      // Get the IP address from the request headers
+      const headersList = await headers()
+      const ip = headersList.get('x-forwarded-for') || 'guest-ip'
+
+      // Call your API to check if this IP can proceed as guest
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/test-access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testId: 1 })
+      })
+
+      const { allowed } = await res.json()
+
+      if (!allowed) {
+        throw new Error('User not authenticated and not allowed to submit answers')
+      }
+      effectiveUserId = ip
+    }
 
     // ** MULTI CHOICE **
     await tx.batch(
@@ -49,7 +78,7 @@ export async function submitExerciseAnswers({multiChoice, sentenceCompletion, sp
           INSERT INTO users_answers_multi_choice 
             (user_id, option_id, date_created, gap_id)
           VALUES (?, ?, ?, ?)`,
-        args: [userId, a.optionID, now, a.gapID]
+        args: [effectiveUserId, a.optionID, now, a.gapID]
       }))
     )
 
@@ -60,11 +89,7 @@ export async function submitExerciseAnswers({multiChoice, sentenceCompletion, sp
           INSERT INTO users_sentence_completion_answers 
             (user_id, exercise_id, completion)
           VALUES (?, ?, ?)`,
-        args: [
-          userId,
-          a.id,
-          a.userAnswer
-        ]
+        args: [effectiveUserId, a.id, a.userAnswer]
       }))
     )
 
@@ -75,7 +100,7 @@ export async function submitExerciseAnswers({multiChoice, sentenceCompletion, sp
           INSERT INTO users_spelling_answers 
             (user_id, exercise_id, position, answer)
           VALUES (?, ?, ?, ?)`,
-        args: [userId, spelling.SpellingExerciseId, a.SpellingWordPosition, a.SpellingWord]
+        args: [effectiveUserId, spelling.SpellingExerciseId, a.SpellingWordPosition, a.SpellingWord]
       }))
     )
 
@@ -86,7 +111,7 @@ export async function submitExerciseAnswers({multiChoice, sentenceCompletion, sp
           INSERT INTO users_words_order_answers 
             (user_id, word_id, word_order)
           VALUES (?, ?, ?)`,
-        args: [userId, a.id, a.userPos]
+        args: [effectiveUserId, a.id, a.userPos]
       }))
     )
 
@@ -97,14 +122,7 @@ export async function submitExerciseAnswers({multiChoice, sentenceCompletion, sp
           INSERT INTO user_answers_punctuation 
             (user_id, exercise_id, position, answer, punctuation_type_id, group_id)
           VALUES (?, ?, ?, ?, ?, ?)`,
-        args: [
-          userId,
-          punctuation.PunctuationExerciseId,
-          a.position,
-          a.answer,
-          a.punctuationTypeId,
-          a.group
-        ]
+        args: [effectiveUserId, punctuation.PunctuationExerciseId, a.position, a.answer, a.punctuationTypeId, a.group]
       }))
     )
 
@@ -115,13 +133,17 @@ export async function submitExerciseAnswers({multiChoice, sentenceCompletion, sp
           INSERT INTO users_phrasal_verbs_answers 
             (user_id, exercise_id, answer)
           VALUES (?, ?, ?)`,
-        args: [
-          userId,
-          a.id,
-          a.userAnswer
-        ]
+        args: [effectiveUserId, a.id, a.userAnswer]
       }))
     )
+    // ** TEST SOLVED BY USERS **
+    await tx.execute({
+      sql: `
+        INSERT INTO test_solved_by_users
+          (user_id, test_id, last_solved_at)
+        VALUES (?, ?, ?)`,
+      args: [effectiveUserId, 1, now]
+    })
 
     await tx.commit()
 
@@ -129,6 +151,9 @@ export async function submitExerciseAnswers({multiChoice, sentenceCompletion, sp
   } catch (error) {
     await tx.rollback()
     console.error('Error al insertar respuestas:', error)
-    return { success: false, msg: 'An unexpected error occurred while submitting your answers. Please try again later.' }
+    return {
+      success: false,
+      msg: 'An unexpected error occurred while submitting your answers. Please try again later.'
+    }
   }
 }

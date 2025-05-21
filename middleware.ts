@@ -9,12 +9,32 @@ const isPublicRouter = createRouteMatcher([
   '/test/demo'
 ])
 const isProtectedRouter = createRouteMatcher([
-  '/test(.*)',
-  // '/api(.*)'
+  '/test(.*)'
 ])
 
-export default clerkMiddleware(async (auth, req)=>{
+export default clerkMiddleware(async (auth, req) => {
   if (isPublicRouter(req)) return NextResponse.next()
+
+  // Si es test y NO está logueado, permitir solo si no ha hecho el test hoy
+  if (req.nextUrl.pathname.startsWith('/test/') && !(await auth()).userId) {
+    // Llama a la API para verificar acceso por IP
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/test-access`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-forwarded-for': req.headers.get('x-forwarded-for') || ''
+      },
+      body: JSON.stringify({ testId: 1 }) // testId hardcodeado, puedes mejorarlo
+    })
+    if (res.status === 403) {
+      // Redirige a login si ya accedió hoy
+      return NextResponse.redirect(new URL('/sign-in', req.url))
+    }
+    // Si no ha accedido hoy, permite el acceso
+    return NextResponse.next()
+  }
+
+  // Proteger rutas privadas para usuarios logueados
   if (isProtectedRouter(req)) await auth.protect()
 
   return NextResponse.next()
