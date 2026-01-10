@@ -1,6 +1,6 @@
-@import 'tailwindcss';
-@plugin '../hero.ts';
-@source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@import "tailwindcss";
+@plugin "../hero.ts";
+@source "../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}";
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -14,17 +14,84 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+@utility anchor-name-* {
+  anchor-name: --value([*]);
+  width: fit-content;
+  background-color: red;
+}
+
+@utility pos-anchor {
+  position: fixed;
+  z-index: 10;
+  width: fit-content;
+  margin: 0;
+  inset: auto;
+}
+
+@utility anchor-top-* {
+  top: anchor(--value("top", "center", "bottom"));
+}
+
+@utility anchor-left-* {
+  left: anchor(--value("left", "right"));
+}
+
+@utility anchor-center-x {
+  left: anchor(center);
+  translate: -50% 0;
+}
+
+@utility anchor-right-* {
+  right: anchor(--value("left", "right"));
+}
+
+@utility anchor-center-y {
+  top: anchor(center);
+  translate: 0 -50%;
+}
+
+@utility anchor-bottom-* {
+  bottom: anchor(--value("top", "center", "bottom"));
+}
+
+@utility try-position-left {
+  position-try-fallbacks: --left-aligned;
+}
+@utility try-position-center {
+  position-try-fallbacks: --center-aligned;
+}
+@utility try-position-right {
+  position-try-fallbacks: --right-aligned;
+}
+
+/* hola */
+@position-try --left-aligned {
+  inset: auto;
+  left: anchor(left);
+  bottom: anchor(top);
+}
+@position-try --center-aligned {
+  /* biome-ignore lint/suspicious/noShorthandPropertyOverrides: biome bug */
+  inset: auto;
+  left: anchor(center);
+  translate: -50% 0;
+  bottom: anchor(top);
+}
+@position-try --right-aligned {
+  /* biome-ignore lint/suspicious/noShorthandPropertyOverrides: biome bug */
+  inset: auto;
+  bottom: anchor(top);
+  right: anchor(right);
+}
 
 body {
   background: var(--background);
   color: var(--foreground);
 }
 
-p{
+p {
   max-width: 80ch;
 }
-
-
 
 /* ******* Counter List ******** */
 /* Emulate ordered list with counter */
@@ -41,7 +108,7 @@ p{
 .counter-list li::before {
   content: counter(li-counter) ".";
   position: absolute;
-  left: .5rem;
+  left: 0.5rem;
   top: 0;
   font-weight: bold;
   color: white;
