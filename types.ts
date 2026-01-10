@@ -103,8 +103,8 @@ export interface WritingA1Answer {
 }
 
 export interface PunctuationAnswer {
-  PunctuationExerciseId: number
-  PunctuationAnswer: PunctuationWordAnswer[]
+  punctuationExerciseId: number
+  punctuationAnswer: PunctuationWordAnswer[]
 }
 
 export interface PunctuationWordAnswer {
@@ -122,6 +122,7 @@ export interface SpellingAnswer {
 export interface SpellingWordAnswer {
   SpellingWord: string
   SpellingWordPosition: number
+  group: number
 }
 
 export interface MultiChoiceAnswer {
@@ -152,7 +153,6 @@ export interface PhrasalVerbsAnswer {
   PhrasalVerbsExerciseId: number
   PhrasalVerbsAnswer: Array<{ id: number; userAnswer: string }>
 }
-
 
 export interface WritingA1Solution {
   punctuationSolution: PunctuationSolution[]
@@ -212,4 +212,3 @@ export interface PhrasalVerbsSolution {
   teacherComment: string | null
   aiComment: string | null
 }
-
