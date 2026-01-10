@@ -1,13 +1,12 @@
-import Link from 'next/link'
+import { BarChart, BookOpen, CheckCircle, GraduationCap, Star, Users } from 'lucide-react'
 import Image from 'next/image'
-import { GraduationCap, BookOpen, BarChart, Users, CheckCircle, Star } from 'lucide-react'
+import Link from 'next/link'
 import Header from './components/Header'
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <Header />
-
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative py-20 overflow-hidden">
@@ -433,6 +432,7 @@ export default function LandingPage() {
               <Link href="#" className="text-gray-400 hover:text-emerald-400 transition-colors">
                 <span className="sr-only">Twitter</span>
                 <svg
+                  role="graphics-symbol"
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
@@ -450,6 +450,7 @@ export default function LandingPage() {
               <Link href="#" className="text-gray-400 hover:text-emerald-400 transition-colors">
                 <span className="sr-only">Facebook</span>
                 <svg
+                  role="graphics-symbol"
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
@@ -477,6 +478,7 @@ export default function LandingPage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   className="h-6 w-6"
+                  role="graphics-symbol"
                 >
                   <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>

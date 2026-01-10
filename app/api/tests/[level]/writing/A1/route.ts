@@ -1,22 +1,19 @@
-import { type NextRequest } from 'next/server'
-import type {
-  WritingA1Test_SQL,
-  MultiChoiceParsed,
-  Gap,
-  Punctuation,
-  Spelling,
-  MultiChoice,
-  WordOrder,
-  SentenceCompletion,
-  PhrasalVerb,
-  WritingA1Test
-} from '@/types'
+import type { NextRequest } from 'next/server'
 import { turso } from '@/libs/db'
+import type {
+  Gap,
+  MultiChoice,
+  MultiChoiceParsed,
+  PhrasalVerb,
+  Punctuation,
+  SentenceCompletion,
+  Spelling,
+  WordOrder,
+  WritingA1Test,
+  WritingA1Test_SQL
+} from '@/types'
 
-async function getExercises(
-  topicId: number,
-  levelId: number
-): Promise<WritingA1Test_SQL> {
+async function getExercises(topicId: number, levelId: number): Promise<WritingA1Test_SQL> {
   const queries = {
     punctuation: turso.execute({
       sql: 'SELECT id, title, script FROM punctuation WHERE topic_id = ? AND level_id = ?',
@@ -117,13 +114,7 @@ function transformData(data: WritingA1Test_SQL): WritingA1Test | null {
     return null
   }
 
-  if (
-    !data.punctuation ||
-    !data.spelling ||
-    !data.wordOrder ||
-    !data.sentenceCompletion ||
-    !data.phrasalVerbs
-  ) {
+  if (!data.punctuation || !data.spelling || !data.wordOrder || !data.sentenceCompletion || !data.phrasalVerbs) {
     return null
   }
 

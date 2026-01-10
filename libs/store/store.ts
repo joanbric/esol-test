@@ -1,47 +1,20 @@
 import { create } from 'zustand'
-
+import { type MultiChoiceActions, type MultiChoiceStates, createMultiChoiceStore } from './multiChoice'
+import { type PhrasalVerbActions, type PhrasalVerbStates, createPhrasalVerbStore } from './phrasalVerb'
+import { type PunctuationActions, type PunctuationStates, createPunctuationStore } from './punctuation'
 import {
-  createPunctuationStore,
-  PunctuationStates,
-  PunctuationActions
-} from './punctuation'
-
-import {
-  createSpellingStore,
-  SpellingStates,
-  SpellingActions
-} from './spelling'
-
-import {
-  createMultiChoiceStore,
-  MultiChoiceStates,
-  MultiChoiceActions
-} from './multiChoice'
-import {
-  createWordOrderStore,
-  WordOrderStates,
-  WordOrderActions
-} from './wordOrder'
-import {
-  createSentenceCompletionStore,
-  SentenceCompletionStates,
-  SentenceCompletionActions
+  type SentenceCompletionActions,
+  type SentenceCompletionStates,
+  createSentenceCompletionStore
 } from './sentenceCompletion'
+import { type SpellingActions, type SpellingStates, createSpellingStore } from './spelling'
+import { type WordOrderActions, type WordOrderStates, createWordOrderStore } from './wordOrder'
 import {
-  createPhrasalVerbStore,
-  PhrasalVerbStates,
-  PhrasalVerbActions
-} from './phrasalVerb'
-import {
-  createWritingA1TestStore,
-  WritingA1TestStates,
-  WritingA1TestActions
-} from './WritingA1Test'
-import {
-  createWritingA1SolutionsStore,
-  WritingA1SolutionsStates,
-  WritingA1SolutionsActions
+  type WritingA1SolutionsActions,
+  type WritingA1SolutionsStates,
+  createWritingA1SolutionsStore
 } from './WritingA1Solutions'
+import { type WritingA1TestActions, type WritingA1TestStates, createWritingA1TestStore } from './WritingA1Test'
 
 type WritingA1Store = PunctuationStates &
   PunctuationActions &

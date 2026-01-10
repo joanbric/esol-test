@@ -1,61 +1,57 @@
+import type { StateCreator } from 'zustand'
 import type { PunctuationAnswer, PunctuationWordAnswer } from '@/types'
-import { StateCreator } from 'zustand'
 
-export type PunctuationStates = PunctuationAnswer
+export type PunctuationStates = PunctuationAnswer & {
+  punctuationTitle: string
+  punctuationScript: string
+}
 export type PunctuationActions = {
-  setPunctuationTitle: (title: PunctuationWordAnswer[]) => void
-  setPunctuationWordTitle: (wordTitle: PunctuationWordAnswer) => void
-  setPunctuationScript: (script: PunctuationWordAnswer[]) => void
-  setPunctuationWordScript: (wordScript: PunctuationWordAnswer) => void
+  setPunctuationTitleAnswer: (title: PunctuationWordAnswer[]) => void
+  setPunctuationWordTitleAnswer: (wordTitle: PunctuationWordAnswer) => void
+  setPunctuationScriptAnswer: (script: PunctuationWordAnswer[]) => void
+  setPunctuationWordScriptAnswer: (wordScript: PunctuationWordAnswer) => void
+  removePunctuationWordAnswer: (position: number, group: number) => void
   setPunctuationExerciseId: (exerciseId: number) => void
+  setPunctuationTitle: (title: string) => void
+  setPunctuationScript: (script: string) => void
 }
 
-const updateWordInArray = (
-  array: PunctuationWordAnswer[],
-  newWord: PunctuationWordAnswer
-) => {
-  const index = array.findIndex(
-    (word) => word.position === newWord.position && word.group === newWord.group
-  )
+const updateWordInArray = (array: PunctuationWordAnswer[], newWord: PunctuationWordAnswer) => {
+  const index = array.findIndex((word) => word.position === newWord.position && word.group === newWord.group)
   if (index >= 0) {
     return array.toSpliced(index, 1, newWord)
   }
   return [...array, newWord]
 }
 
-export const createPunctuationStore: StateCreator<
-  PunctuationStates & PunctuationActions
-> = (set) => {
+export const createPunctuationStore: StateCreator<PunctuationStates & PunctuationActions> = (set) => {
   return {
-    PunctuationExerciseId: -1,
-    PunctuationAnswer: [],
-    setPunctuationTitle: (title) =>
+    punctuationExerciseId: -1,
+    punctuationAnswer: [],
+    punctuationTitle: '',
+    punctuationScript: '',
+    setPunctuationTitleAnswer: (title) =>
       set((state) => ({
-        PunctuationAnswer: [
-          ...state.PunctuationAnswer.filter((word) => word.group !== 1),
-          ...title
-        ]
+        punctuationAnswer: [...state.punctuationAnswer.filter((word) => word.group !== 1), ...title]
       })),
-    setPunctuationWordTitle: (wordTitle) =>
+    setPunctuationWordTitleAnswer: (wordTitle) =>
       set((state) => ({
-        PunctuationAnswer: updateWordInArray(state.PunctuationAnswer, wordTitle)
+        punctuationAnswer: updateWordInArray(state.punctuationAnswer, wordTitle)
       })),
-    punctuationScript: [],
-    setPunctuationScript: (script) =>
+    setPunctuationScriptAnswer: (script) =>
       set((state) => ({
-        PunctuationAnswer: [
-          ...state.PunctuationAnswer.filter((word) => word.group !== 2),
-          ...script
-        ]
+        punctuationAnswer: [...state.punctuationAnswer.filter((word) => word.group !== 2), ...script]
       })),
-    setPunctuationWordScript: (wordScript) =>
+    setPunctuationWordScriptAnswer: (wordScript) =>
       set((state) => ({
-        PunctuationAnswer: updateWordInArray(
-          state.PunctuationAnswer,
-          wordScript
-        )
+        punctuationAnswer: updateWordInArray(state.punctuationAnswer, wordScript)
       })),
-    setPunctuationExerciseId: (exerciseId) =>
-      set({ PunctuationExerciseId: exerciseId })
+    removePunctuationWordAnswer: (position, group) =>
+      set((state) => ({
+        punctuationAnswer: state.punctuationAnswer.filter((a) => a.position !== position || a.group !== group)
+      })),
+    setPunctuationExerciseId: (exerciseId) => set({ punctuationExerciseId: exerciseId }),
+    setPunctuationTitle: (title) => set({ punctuationTitle: title }),
+    setPunctuationScript: (script) => set({ punctuationScript: script })
   }
 }

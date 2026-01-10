@@ -1,10 +1,9 @@
-// app/actions/submitExerciseAnswers.ts
 'use server'
 
-import { turso } from '@/libs/db'
 import { auth } from '@clerk/nextjs/server'
-import { WritingA1Answer } from '@/types'
 import { headers } from 'next/headers'
+import { turso } from '@/libs/db'
+import type { WritingA1Answer } from '@/types'
 
 // interface SubmitExerciseAnswersParams {
 //   multiChoiceAnswers: { option_id: number; gap_id: number }[]

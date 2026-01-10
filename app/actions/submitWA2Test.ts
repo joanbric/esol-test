@@ -1,9 +1,7 @@
 'use server'
-import { turso } from '@/libs/db'
-import z from 'zod'
 import { auth } from '@clerk/nextjs/server'
-import { headers } from 'next/headers'
-import Tasks from '../(service)/tests/create/writing/A2/Tasks'
+import z from 'zod'
+import { turso } from '@/libs/db'
 
 const wa2TestSchema = z.object({
   title: z.string().min(1),
@@ -28,10 +26,11 @@ function transformData(formData: FormData) {
 
   for (const key of formData.keys()) {
     if ((key as string).includes('task')) {
-      if (parsedData['tasks']) {
-        ;(parsedData['tasks'] as { [key: string]: string }[]).push({ id: key, value: formData.get(key) as string })
+      const taskKey = 'tasks'
+      if (parsedData[taskKey]) {
+        (parsedData[taskKey] as { [key: string]: string }[]).push({ id: key, value: formData.get(key) as string })
       } else {
-        parsedData['tasks'] = [{ id: key, value: formData.get(key) as string }]
+        parsedData[taskKey] = [{ id: key, value: formData.get(key) as string }]
       }
     } else {
       parsedData[key] = formData.get(key) as string
