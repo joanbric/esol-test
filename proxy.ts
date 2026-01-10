@@ -24,7 +24,7 @@ export default clerkMiddleware(async (authentication, req) => {
     })
     if (res.status === 403) {
       // Redirige a login si ya accedió hoy
-      return NextResponse.redirect(new URL('/sign-in', req.url))
+      return NextResponse.redirect(new URL('/login', req.url))
     }
     // Si no ha accedido hoy, permite el acceso
     return NextResponse.next()
